@@ -2,4 +2,5 @@
 <resources>
 	<dimen name="movie_grid_title_padding">16dp</dimen>
 	<integer name="number_of_grid_columns">2</integer>
+	<string name="poster_url">http://image.tmdb.org/t/p/w342</string>
 </resources>

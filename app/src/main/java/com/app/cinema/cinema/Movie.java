@@ -1,8 +1,11 @@
 package com.app.cinema.cinema;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -25,6 +28,10 @@ public class Movie implements Parcelable {
     private String releaseDate;
     @SerializedName("poster_path")
     private String posterPath;
+
+    public Movie(){
+
+    }
 
     public Movie(int id,
                  double voteAverage,
@@ -86,9 +93,17 @@ public class Movie implements Parcelable {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     @Nullable
     public Double getVoteAvg() {
         return voteAverage;
+    }
+
+    public void setVoteAverage(double voteAvg){
+        this.voteAverage = voteAvg;
     }
 
     @Nullable
@@ -96,8 +111,17 @@ public class Movie implements Parcelable {
         return originalTitle;
     }
 
+
+    public void setOriginalTitle(String title){
+        this.originalTitle = title;
+    }
+
     public String getBackdrop() {
         return backdropPath;
+    }
+
+    public void setBackdropPath(String backdrpPath){
+        this.backdropPath = backdrpPath;
     }
 
     @Nullable
@@ -105,12 +129,34 @@ public class Movie implements Parcelable {
         return overview;
     }
 
+    public void setOverview(String ovrview){
+        this.overview = ovrview;
+    }
+
     public String getReleaseDate() {
         return releaseDate;
     }
 
+    public void setReleaseDate(String releaseDate){
+
+        this.releaseDate = releaseDate;
+    }
+
     public String getPosterPath() {
         return getPosterPath();
+    }
+
+    @Nullable
+    public String getPosterPath(Context context) {
+        if (posterPath != null && !posterPath.isEmpty()) {
+            return "http://image.tmdb.org/t/p/w342" + posterPath;
+        }
+        return null; //Use Picasso to put placeholder for poster
+    }
+
+
+    public void setPosterPath(String posterPath){
+        this.posterPath = posterPath;
     }
 
 
