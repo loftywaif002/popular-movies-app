@@ -4,4 +4,12 @@
 	<string name="title_network_alert">Network Error</string>
 	<string name="message_network_alert">Make sure you are connected to Internet</string>
 	<string name="release_date_error">Release Date Missing</string>
+
+	<!--DashBoard Menu Strings-->
+	<string name="top_rated">Top rated</string>
+	<string name="favorites">Favorites</string>
+	<string name="popular">Popular</string>
+	<string name="sort_by">Sort by</string>
+
+
 </resources>

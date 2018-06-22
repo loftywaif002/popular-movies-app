@@ -6,16 +6,24 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.app.cinema.cinema.database.MovieDatabase;
+import com.app.cinema.cinema.database.MovieEntry;
 import com.app.cinema.cinema.utilities.NetworkUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,6 +49,10 @@ public class Dashboard extends AppCompatActivity {
 
     private MovieAdapter mAdapter;
 
+    private String mSortBy = FetchMovies.POPULAR;
+
+    private MovieDatabase mDb;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +61,7 @@ public class Dashboard extends AppCompatActivity {
         setContentView(R.layout.activity_dashboard);
         ButterKnife.bind(this);
         mProgressBar.setVisibility(View.INVISIBLE); //Hide Progressbar by Default
+        //Creating new Database for movies
 
         if(NetworkUtils.networkStatus(Dashboard.this)){
             new FetchMovies().execute();
@@ -65,12 +78,29 @@ public class Dashboard extends AppCompatActivity {
         mAdapter = new MovieAdapter(new ArrayList<Movie>());
         movie_grid_recyclerView.setAdapter(mAdapter);
 
+        mDb = MovieDatabase.getsInstance(getApplicationContext());
+        //Create new MovieEntry object
+        createMovie();
+    }
+
+    public void createMovie(){
+        Date date = new Date();
+        MovieEntry movieEntry = new MovieEntry(1,1,"originalTitle","backdropPath","overview","releaseDate","posterPath",date);
+        mDb.movieDao().insertMovie(movieEntry);
+
+        List<Movie> movies = mDb.movieDao().loadFavoriteMovies();
+        String test_name = movies.get(0).getOriginalTitle();
+        Log.d(TAG,test_name);
+        Toast.makeText(Dashboard.this,test_name,Toast.LENGTH_LONG).show();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
+        List<Movie> movies = mDb.movieDao().loadFavoriteMovies();
+        String test_name = movies.get(0).getOriginalTitle();
+        Log.d(TAG,test_name);
+        Toast.makeText(Dashboard.this,test_name,Toast.LENGTH_LONG).show();
         if(NetworkUtils.networkStatus(Dashboard.this)){
             new FetchMovies().execute();
         }else{
@@ -83,8 +113,72 @@ public class Dashboard extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.dashboard, menu);
+
+        switch (mSortBy) {
+            case FetchMovies.POPULAR:
+                menu.findItem(R.id.sort_by_popular).setChecked(true);
+                break;
+            case FetchMovies.TOP_RATED:
+                menu.findItem(R.id.sort_by_top_rated).setChecked(true);
+                break;
+            case FetchMovies.FAVORITES:
+                menu.findItem(R.id.sort_by_favorites).setChecked(true);
+                break;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.sort_by_top_rated:
+                mSortBy = FetchMovies.TOP_RATED;
+                refreshList(mSortBy);
+                item.setChecked(true);
+                break;
+            case R.id.sort_by_popular:
+                mSortBy = FetchMovies.POPULAR;
+                refreshList(mSortBy);
+                item.setChecked(true);
+                break;
+            case R.id.sort_by_favorites:
+                mSortBy = FetchMovies.FAVORITES;
+                item.setChecked(true);
+                refreshList(mSortBy);
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void refreshList(String sort_by) {
+        switch (sort_by){
+            case FetchMovies.POPULAR:
+            mAdapter = new MovieAdapter(new ArrayList<Movie>());
+            mAdapter.add(mPopularList);
+            movie_grid_recyclerView.setAdapter(mAdapter);
+            break;
+            case FetchMovies.TOP_RATED:
+            mAdapter = new MovieAdapter(new ArrayList<Movie>());
+            mAdapter.add(mTopTopRatedList);
+            movie_grid_recyclerView.setAdapter(mAdapter);
+            break;
+        }
+
+
+    }
+
+
     //AsyncTask
     public class FetchMovies extends AsyncTask<Void,Void,Void> {
+
+        public final static String POPULAR = "popular";
+        public final static String TOP_RATED = "top_rated";
+        public final static String FAVORITES = "favorites";
 
         @Override
         protected void onPreExecute() {
@@ -127,6 +221,8 @@ public class Dashboard extends AppCompatActivity {
             mAdapter = new MovieAdapter(new ArrayList<Movie>());
             mAdapter.add(mPopularList);
             movie_grid_recyclerView.setAdapter(mAdapter);
+
+
         }
     }
 }

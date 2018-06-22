@@ -60,9 +60,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         final Context context = holder.mView.getContext();
 
         holder.mMovie = movie;
-        holder.mMovietitle.setText(movie.getTitle());
+        holder.mMovietitle.setText(movie.getOriginalTitle());
 
-        String posterUrl = movie.getPosterPath(context);
+        String posterUrl = movie.getPosterPath();
         // Warning: onError() will not be called, if url is null.
         // Empty url leads to app crash.
         if (posterUrl == null) {
@@ -70,7 +70,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         }
 
         Picasso.get()
-                .load(movie.getPosterPath(context))
+                .load(movie.getPosterPath())
                 .config(Bitmap.Config.RGB_565)
                 .placeholder(R.drawable.image_placeholder)
                 .into(holder.mMovieThumbnail,

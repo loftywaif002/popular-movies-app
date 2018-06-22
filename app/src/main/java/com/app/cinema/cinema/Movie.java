@@ -88,7 +88,7 @@ public class Movie implements Parcelable {
         parcel.writeString(posterPath);
     }
 
-    //Getter methods
+    //Getter Methods
     public int getId() {
         return id;
     }
@@ -97,67 +97,59 @@ public class Movie implements Parcelable {
         this.id = id;
     }
 
-    @Nullable
-    public Double getVoteAvg() {
+    public double getVoteAverage() {
         return voteAverage;
     }
 
-    public void setVoteAverage(double voteAvg){
-        this.voteAverage = voteAvg;
+    public void setVoteAverage(double voteAverage) {
+        this.voteAverage = voteAverage;
     }
 
-    @Nullable
-    public String getTitle() {
+    public String getOriginalTitle() {
         return originalTitle;
     }
 
-
-    public void setOriginalTitle(String title){
-        this.originalTitle = title;
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
     }
 
-    public String getBackdrop() {
-        return backdropPath;
+    public String getBackdropPath() {
+        if (backdropPath != null && !backdropPath.isEmpty()) {
+            return "http://image.tmdb.org/t/p/original" + backdropPath;
+        }
+        return null; //Use Picasso to put placeholder for poster
     }
 
-    public void setBackdropPath(String backdrpPath){
-        this.backdropPath = backdrpPath;
+    public void setBackdropPath(String backdropPath) {
+        this.backdropPath = backdropPath;
     }
 
-    @Nullable
     public String getOverview() {
         return overview;
     }
 
-    public void setOverview(String ovrview){
-        this.overview = ovrview;
+    public void setOverview(String overview) {
+        this.overview = overview;
     }
 
     public String getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(String releaseDate){
-
+    public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
     }
 
-    public String getPosterPath() {
-        return getPosterPath();
-    }
-
     @Nullable
-    public String getPosterPath(Context context) {
+    public String getPosterPath() {
         if (posterPath != null && !posterPath.isEmpty()) {
             return "http://image.tmdb.org/t/p/w342" + posterPath;
         }
         return null; //Use Picasso to put placeholder for poster
     }
 
-
-    public void setPosterPath(String posterPath){
+    public void setPosterPath(String posterPath) {
         this.posterPath = posterPath;
     }
-
 
 }
