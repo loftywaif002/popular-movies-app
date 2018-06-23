@@ -3,4 +3,34 @@
 	<dimen name="movie_grid_title_padding">16dp</dimen>
 	<integer name="number_of_grid_columns">2</integer>
 	<string name="poster_url">http://image.tmdb.org/t/p/w342</string>
+
+
+	<!--Movie Details dimens-->
+	<dimen name="details_activity_vertical_margin">16dp</dimen>
+	<dimen name="details_activity_horizontal_margin">16dp</dimen>
+	<dimen name="details_movie_poster_width">140dp</dimen>
+	<dimen name="details_movie_poster_height">210dp</dimen>
+	<dimen name="details_movie_poster_padding_right">16dp</dimen>
+	<dimen name="details_movie_poster_vertical_padding">16dp</dimen>
+	<dimen name="detail_title_left_padding">4dp</dimen>
+	<dimen name="detail_title_bottom_margin">4dp</dimen>
+	<dimen name="favorite_button_vertical_margin">16dp</dimen>
+
+	<dimen name="button_height">36dp</dimen>
+	<dimen name="button_horizontal_padding">16dp</dimen>
+	<dimen name="button_vertical_padding">0dp</dimen>
+	<dimen name="button_vertical_margin">16dp</dimen>
+
+	<dimen name="details_horizontal_margin">16dp</dimen>
+	<dimen name="details_movie_date_vertical_padding">16dp</dimen>
+	<dimen name="movie_overview_padding_top">16dp</dimen>
+
+	<!--Trailer-->
+	<dimen name="trailer_list_vertical_padding">16dp</dimen>
+	<dimen name="trailer_width_for_detail">150dp</dimen>
+	<dimen name="trailer_height_for_detail">100dp</dimen>
+
+	<!--Reviews-->
+	<dimen name="detail_vertical_padding">8dp</dimen>
+	<dimen name="detail_horizontal_padding">16dp</dimen>
 </resources>

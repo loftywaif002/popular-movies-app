@@ -80,7 +80,7 @@ public class Dashboard extends AppCompatActivity {
 
         mDb = MovieDatabase.getsInstance(getApplicationContext());
         //Create new MovieEntry object
-        createMovie();
+        //createMovie();
     }
 
     public void createMovie(){
@@ -88,6 +88,7 @@ public class Dashboard extends AppCompatActivity {
         MovieEntry movieEntry = new MovieEntry(1,1,"originalTitle","backdropPath","overview","releaseDate","posterPath",date);
         mDb.movieDao().insertMovie(movieEntry);
 
+        //Reading Data
         List<Movie> movies = mDb.movieDao().loadFavoriteMovies();
         String test_name = movies.get(0).getOriginalTitle();
         Log.d(TAG,test_name);
@@ -171,6 +172,8 @@ public class Dashboard extends AppCompatActivity {
 
 
     }
+
+    
 
 
     //AsyncTask

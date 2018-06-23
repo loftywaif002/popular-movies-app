@@ -78,7 +78,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
                             @Override
                             public void onSuccess() {
                                 if (holder.mMovie.getId() != movie.getId()) {
-                                    //holder.cleanUp();
+                                    holder.cleanUp();
                                 } else {
                                     holder.mMovieThumbnail.setVisibility(View.VISIBLE);
                                 }
@@ -123,6 +123,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         }
         //Other methods
+        public void cleanUp() {
+            final Context context = mView.getContext();
+            Picasso.get().cancelRequest(mMovieThumbnail);
+            mMovieThumbnail.setImageBitmap(null);
+            mMovieThumbnail.setVisibility(View.INVISIBLE);
+            mMovietitle.setVisibility(View.GONE);
+        }
 
     }
     public void add(List<Movie> movies) {

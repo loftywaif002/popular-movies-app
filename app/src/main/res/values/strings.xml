@@ -11,5 +11,10 @@
 	<string name="popular">Popular</string>
 	<string name="sort_by">Sort by</string>
 
+	<!--Movie Details Section-->
+	<string name="share_trailer">Share trailer</string>
+	<string name="add_to_favorites">Mark as favorite</string>
+	<string name="remove_from_favorites">Remove from favorites</string>
+	<string name="watch_trailer">Watch trailer</string>
 
 </resources>
