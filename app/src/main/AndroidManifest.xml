@@ -20,7 +20,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".Dashboard"></activity>
-        <activity android:name=".MovieDetails.MovieDetailActivity"></activity>
+        <activity android:name=".MovieDetails.MovieDetailActivity"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value="com.app.cinema.cinema.Dashboard" />
     </application>
 
 </manifest>
