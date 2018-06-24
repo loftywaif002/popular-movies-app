@@ -4,7 +4,7 @@
 	<integer name="number_of_grid_columns">2</integer>
 	<string name="poster_url">http://image.tmdb.org/t/p/w342</string>
 
-
+    <dimen name="app_bar_height">200dp</dimen>
 	<!--Movie Details dimens-->
 	<dimen name="details_activity_vertical_margin">16dp</dimen>
 	<dimen name="details_activity_horizontal_margin">16dp</dimen>

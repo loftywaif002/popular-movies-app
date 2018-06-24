@@ -1,5 +1,6 @@
 package com.app.cinema.cinema;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -16,6 +17,8 @@ import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.app.cinema.cinema.MovieDetails.MovieDetailActivity;
+import com.app.cinema.cinema.MovieDetails.MovieDetailFragment;
 import com.app.cinema.cinema.database.MovieDatabase;
 import com.app.cinema.cinema.database.MovieEntry;
 import com.app.cinema.cinema.utilities.NetworkUtils;
@@ -29,9 +32,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class Dashboard extends AppCompatActivity {
+public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemClickListener{
 
     private static final String TAG = Dashboard.class.getSimpleName();
+
+    private boolean tabletView;
 
     String myApiKey = "525e39d1c3568cd23cdaf0a3674918fa";
 
@@ -75,8 +80,11 @@ public class Dashboard extends AppCompatActivity {
         //Define recyclerView Layout
         movie_grid_recyclerView.setLayoutManager(new GridLayoutManager(this, getResources()
                 .getInteger(R.integer.number_of_grid_columns)));
-        mAdapter = new MovieAdapter(new ArrayList<Movie>());
+        mAdapter = new MovieAdapter(new ArrayList<Movie>(), this);
         movie_grid_recyclerView.setAdapter(mAdapter);
+
+        // Large-screen
+        tabletView = findViewById(R.id.movie_detail_container) != null;
 
         mDb = MovieDatabase.getsInstance(getApplicationContext());
         //Create new MovieEntry object
@@ -95,24 +103,7 @@ public class Dashboard extends AppCompatActivity {
         Toast.makeText(Dashboard.this,test_name,Toast.LENGTH_LONG).show();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        List<Movie> movies = mDb.movieDao().loadFavoriteMovies();
-        String test_name = movies.get(0).getOriginalTitle();
-        Log.d(TAG,test_name);
-        Toast.makeText(Dashboard.this,test_name,Toast.LENGTH_LONG).show();
-        if(NetworkUtils.networkStatus(Dashboard.this)){
-            new FetchMovies().execute();
-        }else{
-            AlertDialog.Builder dialog = new AlertDialog.Builder(Dashboard.this);
-            dialog.setTitle(getString(R.string.title_network_alert));
-            dialog.setMessage(getString(R.string.message_network_alert));
-            dialog.setCancelable(false);
-            dialog.show();
-        }
 
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -159,12 +150,12 @@ public class Dashboard extends AppCompatActivity {
     private void refreshList(String sort_by) {
         switch (sort_by){
             case FetchMovies.POPULAR:
-            mAdapter = new MovieAdapter(new ArrayList<Movie>());
+            mAdapter = new MovieAdapter(new ArrayList<Movie>(),this);
             mAdapter.add(mPopularList);
             movie_grid_recyclerView.setAdapter(mAdapter);
             break;
             case FetchMovies.TOP_RATED:
-            mAdapter = new MovieAdapter(new ArrayList<Movie>());
+            mAdapter = new MovieAdapter(new ArrayList<Movie>(),this);
             mAdapter.add(mTopTopRatedList);
             movie_grid_recyclerView.setAdapter(mAdapter);
             break;
@@ -173,7 +164,15 @@ public class Dashboard extends AppCompatActivity {
 
     }
 
-    
+    public void send_details(Movie movie, int position) {
+        if (tabletView) {
+
+        } else {
+            Intent intent = new Intent(this, MovieDetailActivity.class);
+            intent.putExtra(MovieDetailFragment.ARG_MOVIE, movie);
+            startActivity(intent);
+        }
+    }
 
 
     //AsyncTask
@@ -221,11 +220,9 @@ public class Dashboard extends AppCompatActivity {
             super.onPostExecute(s);
             mProgressBar.setVisibility(View.INVISIBLE);
             //Load popular movies by default
-            mAdapter = new MovieAdapter(new ArrayList<Movie>());
+            mAdapter = new MovieAdapter(new ArrayList<Movie>(),Dashboard.this);
             mAdapter.add(mPopularList);
             movie_grid_recyclerView.setAdapter(mAdapter);
-
-
         }
     }
 }

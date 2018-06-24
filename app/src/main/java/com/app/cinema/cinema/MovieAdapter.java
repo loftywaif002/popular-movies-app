@@ -2,6 +2,7 @@ package com.app.cinema.cinema;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -17,6 +18,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import com.app.cinema.cinema.MovieDetails.MovieDetailActivity;
+import com.app.cinema.cinema.MovieDetails.MovieDetailFragment;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -27,10 +30,16 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     private final ArrayList<Movie> mMovies;
 
+    private OnItemClickListener mOnItemClickListener;
 
-    public MovieAdapter(ArrayList<Movie> movies) {
+    public interface OnItemClickListener {
+        void send_details(Movie movie, int position);
+    }
+
+
+    public MovieAdapter(ArrayList<Movie> movies, OnItemClickListener mItemClickListener) {
         mMovies = movies;
-
+        this.mOnItemClickListener = mItemClickListener;
     }
 
 
@@ -49,6 +58,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         view.getLayoutParams().height = (int) (parent.getWidth() / gridColsNumber *
                 POSTER_ASPECT_RATIO);
+
 
         MovieViewHolder viewHolder = new MovieViewHolder(view);
         return viewHolder;
@@ -94,14 +104,21 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+               mOnItemClickListener.send_details(movie,holder.getAdapterPosition());
             }
         });
     }
 
+
     @Override
     public int getItemCount() {
         return mMovies.size();
+    }
+
+    @Override
+    public void onViewRecycled(MovieViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.cleanUp();
     }
 
     //Inner Class
