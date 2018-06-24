@@ -61,7 +61,7 @@ public class NetworkUtils {
                 JSONObject jsonObject = resArray.getJSONObject(i);
                 Movie movie = new Movie(); //New Movie object
                 movie.setId(jsonObject.getInt("id"));
-                movie.setVoteAverage(jsonObject.getDouble("vote_average"));
+                movie.setVoteAverage(jsonObject.getString("vote_average"));
                 movie.setOriginalTitle(jsonObject.getString("original_title"));
                 movie.setBackdropPath(jsonObject.getString("backdrop_path"));
                 movie.setOverview(jsonObject.getString("overview"));
@@ -72,7 +72,7 @@ public class NetworkUtils {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            Log.e(TAG, "Erro occurred during JSON Parsing");
+            Log.e(TAG, "Error occurred during JSON Parsing");
         }
 
     }

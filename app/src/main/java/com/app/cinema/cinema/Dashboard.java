@@ -38,7 +38,7 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
 
     private boolean tabletView;
 
-    String myApiKey = "525e39d1c3568cd23cdaf0a3674918fa";
+    String myApiKey = BuildConfig.API_KEY;
 
     @BindView(R.id.recycled_movie_grid)
     RecyclerView movie_grid_recyclerView;
