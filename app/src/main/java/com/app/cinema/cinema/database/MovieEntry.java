@@ -12,10 +12,8 @@ public class MovieEntry {
     @PrimaryKey (autoGenerate = true)
     private int id;
 
-
-
     private int movieId;
-    private double voteAverage;
+    private String voteAverage;
     private String originalTitle;
     private String backdropPath;
     private String overview;
@@ -26,7 +24,7 @@ public class MovieEntry {
 
     @Ignore
     public MovieEntry(int movieId,
-                      double voteAverage,
+                      String voteAverage,
                       String originalTitle,
                       String backdropPath,
                       String overview,
@@ -45,7 +43,7 @@ public class MovieEntry {
 
     //Constructor 2
     public MovieEntry(int id, int movieId,
-                 double voteAverage,
+                 String voteAverage,
                  String originalTitle,
                  String backdropPath,
                  String overview,
@@ -80,11 +78,11 @@ public class MovieEntry {
         this.movieId = movieId;
     }
 
-    public double getVoteAverage() {
+    public String getVoteAverage() {
         return voteAverage;
     }
 
-    public void setVoteAverage(double voteAverage) {
+    public void setVoteAverage(String voteAverage) {
         this.voteAverage = voteAverage;
     }
 

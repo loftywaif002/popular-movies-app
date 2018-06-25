@@ -1,8 +1,11 @@
 package com.app.cinema.cinema;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -86,21 +89,23 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
         // Large-screen
         tabletView = findViewById(R.id.movie_detail_container) != null;
 
-        mDb = MovieDatabase.getsInstance(getApplicationContext());
+        //mDb = MovieDatabase.getsInstance(getApplicationContext());
+
         //Create new MovieEntry object
         //createMovie();
     }
 
+
     public void createMovie(){
-        Date date = new Date();
-        MovieEntry movieEntry = new MovieEntry(1,1,"originalTitle","backdropPath","overview","releaseDate","posterPath",date);
-        mDb.movieDao().insertMovie(movieEntry);
+        //Date date = new Date();
+       // MovieEntry movieEntry = new MovieEntry(1,1,"originalTitle","backdropPath","overview","releaseDate","posterPath",date);
+       // mDb.movieDao().insertMovie(movieEntry);
 
         //Reading Data
-        List<Movie> movies = mDb.movieDao().loadFavoriteMovies();
-        String test_name = movies.get(0).getOriginalTitle();
-        Log.d(TAG,test_name);
-        Toast.makeText(Dashboard.this,test_name,Toast.LENGTH_LONG).show();
+        //List<Movie> movies = mDb.movieDao().loadFavoriteMovies();
+        //String test_name = movies.get(0).getOriginalTitle();
+        //Log.d(TAG,test_name);
+        //Toast.makeText(Dashboard.this,test_name,Toast.LENGTH_LONG).show();
     }
 
 

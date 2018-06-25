@@ -1,9 +1,12 @@
 package com.app.cinema.cinema.MovieDetails;
 
 import android.app.Activity;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -14,6 +17,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.ShareActionProvider;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,10 +32,13 @@ import com.app.cinema.cinema.Movie;
 import com.app.cinema.cinema.MovieComponents.Reviews;
 import com.app.cinema.cinema.MovieComponents.Trailers;
 import com.app.cinema.cinema.R;
+import com.app.cinema.cinema.database.MovieDatabase;
+import com.app.cinema.cinema.database.MovieEntry;
 import com.app.cinema.cinema.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -41,14 +48,20 @@ import butterknife.ButterKnife;
 public class MovieDetailFragment extends Fragment implements
         TrailerAdapter.OnItemClickListener, TrailersTask.Listener, ReviewsTask.Listener, ReviewAdapter.OnItemClickListener{
 
+    public static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
+
     public static final String ARG_MOVIE = "ARG_MOVIE";
     public static final String EXTRA_TRAILERS = "EXTRA_TRAILERS";
     public static final String EXTRA_REVIEWS = "EXTRA_REVIEWS";
+
+    public static Boolean isFavorite = false;
 
     private Movie mMovie;
     private TrailerAdapter mTrailerListAdapter;
     private ReviewAdapter mReviewAdapter;
     private ShareActionProvider mShareActionProvider;
+    private static MovieDatabase mDb;
+    private LiveData<List<Movie>> movies;
 
     @BindView(R.id.trailer_list)
     RecyclerView mRecyclerViewForTrailers;
@@ -108,6 +121,7 @@ public class MovieDetailFragment extends Fragment implements
                     .config(Bitmap.Config.RGB_565)
                     .into(movieBackdrop);
         }
+
     }
 
     @Override
@@ -129,11 +143,18 @@ public class MovieDetailFragment extends Fragment implements
 
         updateFavorites(); //Deals to Room
 
+
+
         load_trailers(savedInstanceState);
         load_reviews(savedInstanceState);
 
+        //Database
+        mDb = MovieDatabase.getsInstance(getContext());
+        Log.d(LOG_TAG,"Getting all movies from database");
+        movies = mDb.movieDao().loadFavoriteMovies();
         return rootView;
     }
+
 
     private void load_reviews(Bundle savedInstanceState) {
         // List of reviews (Vertically Arranged)
@@ -209,7 +230,9 @@ public class MovieDetailFragment extends Fragment implements
             mButtonWatchTrailer.setEnabled(!trailers.isEmpty());
             if (mTrailerListAdapter.getItemCount() > 0) {
                 Trailers trailer = mTrailerListAdapter.getTrailers().get(0);
-                refresh_share_action_provider(trailer);
+                if(trailer !=null){
+                    refresh_share_action_provider(trailer);
+                }
             }
         }
 
@@ -259,7 +282,71 @@ public class MovieDetailFragment extends Fragment implements
     }
 
 
+    public void mark_as_favorite() {
+        Log.d(LOG_TAG,"Calling check for favorite method");
+        check_for_favorite();
+
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                if (!isFavorite) {
+                  //Store movie object to the database
+                    final Date date = new Date();
+                    MovieEntry movieEntry = new MovieEntry(
+                            mMovie.getId(),
+                            mMovie.getVoteAverage(),
+                            mMovie.getOriginalTitle(),
+                            mMovie.getBackdropPath(),
+                            mMovie.getOverview(),
+                            mMovie.getReleaseDate(),
+                            mMovie.getPosterPath(),
+                            date);
+                    mDb.movieDao().insertMovie(movieEntry);
+                    Log.d(LOG_TAG,"Was not marked as Favorite, Marking it!");
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void v) {
+                updateFavorites();
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+
+    }
+
+
     private void updateFavorites() {
+
+        new AsyncTask<Void, Void, Boolean>() {
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                Log.d(LOG_TAG,"Inside update favorites"+isFavorite);
+                return isFavorite;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean favorite) {
+                if (favorite) {
+                    mButtonRemoveFromFavorites.setVisibility(View.VISIBLE);
+                    mButtonMarkAsFavorite.setVisibility(View.GONE);
+                } else {
+                    mButtonMarkAsFavorite.setVisibility(View.VISIBLE);
+                    mButtonRemoveFromFavorites.setVisibility(View.GONE);
+                }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        mButtonMarkAsFavorite.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mark_as_favorite();
+                    }
+                });
 
         mButtonWatchTrailer.setOnClickListener(
                 new View.OnClickListener() {
@@ -285,6 +372,14 @@ public class MovieDetailFragment extends Fragment implements
     }
 
 
-
+    private boolean check_for_favorite() {
+        //Check the database if this is already in the list
+        //Reading Data
+        if(movies!=null){
+            Log.d(LOG_TAG,"movies is not empty");
+            isFavorite = true;
+        }
+        return isFavorite;
+    }
 
 }

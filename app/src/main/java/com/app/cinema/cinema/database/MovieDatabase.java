@@ -1,13 +1,15 @@
 package com.app.cinema.cinema.database;
 
+import android.arch.persistence.db.SupportSQLiteDatabase;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.TypeConverters;
+import android.arch.persistence.room.migration.Migration;
 import android.content.Context;
 import android.util.Log;
 
-@Database(entities = {MovieEntry.class}, version = 1, exportSchema = false)
+@Database(entities = {MovieEntry.class}, version = 4, exportSchema = false)
 @TypeConverters({DateConverter.class})
 public abstract class MovieDatabase extends RoomDatabase{
 
@@ -22,13 +24,19 @@ public abstract class MovieDatabase extends RoomDatabase{
                 Log.d(LOG_TAG,"Creating new database instance");
                 sInstance = Room.databaseBuilder(context.getApplicationContext(),
                         MovieDatabase.class,MovieDatabase.DATABSE_NAME)
-                        .allowMainThreadQueries()
                         .build();
             }
         }
         Log.d(LOG_TAG,"Getting the Database Instance");
         return sInstance;
     }
+
+    static final Migration MIGRATION_2_4 = new Migration(2, 4) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+           // Since we didn't alter the table, there's nothing else to do here.
+        }
+    };
 
     public abstract MovieDao movieDao();
 }

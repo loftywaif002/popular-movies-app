@@ -23,6 +23,7 @@ android {
 
 dependencies {
     def room_version = "1.1.1"
+    def lifecycle_version = "1.1.1"
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
@@ -39,4 +40,6 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation "android.arch.persistence.room:runtime:$room_version"
     annotationProcessor "android.arch.persistence.room:compiler:$room_version"
+    implementation "android.arch.lifecycle:extensions:$lifecycle_version"
+    annotationProcessor "android.arch.lifecycle:compiler:$lifecycle_version"
 }

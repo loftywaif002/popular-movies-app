@@ -1,5 +1,6 @@
 package com.app.cinema.cinema.database;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -15,7 +16,7 @@ import java.util.List;
 public interface MovieDao {
 
     @Query("SELECT * FROM movie")
-    List<Movie> loadFavoriteMovies();
+    LiveData<List<Movie>> loadFavoriteMovies();
 
     @Insert
     void insertMovie(MovieEntry movieEntry);
@@ -26,4 +27,7 @@ public interface MovieDao {
 
     @Delete
     void deleteMovie(MovieEntry movieEntry);
+
+    @Query("SELECT * FROM movie WHERE id = :id")
+    MovieEntry loadMovieById(int id);
 }
