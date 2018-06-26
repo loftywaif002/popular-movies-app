@@ -6,6 +6,7 @@ import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.RoomWarnings;
 import android.arch.persistence.room.Update;
 
 import com.app.cinema.cinema.Movie;
@@ -14,7 +15,7 @@ import java.util.List;
 
 @Dao
 public interface MovieDao {
-
+    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH)
     @Query("SELECT * FROM movie")
     LiveData<List<Movie>> loadFavoriteMovies();
 
@@ -30,4 +31,7 @@ public interface MovieDao {
 
     @Query("SELECT * FROM movie WHERE id = :id")
     MovieEntry loadMovieById(int id);
+
+    @Query("DELETE FROM movie WHERE id = :id")
+    void deleteMovieById(int id);
 }

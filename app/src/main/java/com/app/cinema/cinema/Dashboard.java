@@ -61,6 +61,7 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
 
     private MovieDatabase mDb;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,25 +90,8 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
         // Large-screen
         tabletView = findViewById(R.id.movie_detail_container) != null;
 
-        //mDb = MovieDatabase.getsInstance(getApplicationContext());
 
-        //Create new MovieEntry object
-        //createMovie();
     }
-
-
-    public void createMovie(){
-        //Date date = new Date();
-       // MovieEntry movieEntry = new MovieEntry(1,1,"originalTitle","backdropPath","overview","releaseDate","posterPath",date);
-       // mDb.movieDao().insertMovie(movieEntry);
-
-        //Reading Data
-        //List<Movie> movies = mDb.movieDao().loadFavoriteMovies();
-        //String test_name = movies.get(0).getOriginalTitle();
-        //Log.d(TAG,test_name);
-        //Toast.makeText(Dashboard.this,test_name,Toast.LENGTH_LONG).show();
-    }
-
 
 
     @Override
@@ -164,6 +148,9 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
             mAdapter.add(mTopTopRatedList);
             movie_grid_recyclerView.setAdapter(mAdapter);
             break;
+            case FetchMovies.FAVORITES:
+
+            break;
         }
 
 
@@ -199,6 +186,7 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
 
             popularMoviesURL = "https://api.themoviedb.org/3/movie/popular?api_key="+myApiKey+"&language=en-US";
             topRatedMoviesURL = "https://api.themoviedb.org/3/movie/top_rated?api_key="+myApiKey+"&language=en-US";
+
 
             mPopularList = new ArrayList<>();
             mTopTopRatedList = new ArrayList<>();
