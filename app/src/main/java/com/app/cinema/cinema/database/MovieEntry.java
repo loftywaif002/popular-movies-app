@@ -9,10 +9,11 @@ import java.util.Date;
 @Entity (tableName = "movie")
 public class MovieEntry {
 
-    @PrimaryKey (autoGenerate = true)
-    private int id;
+    //@PrimaryKey (autoGenerate = true)
 
-    private int movieId;
+
+    @PrimaryKey
+    private int id;
     private String voteAverage;
     private String originalTitle;
     private String backdropPath;
@@ -22,8 +23,8 @@ public class MovieEntry {
     @ColumnInfo(name = "updated_at")
     private Date updated_at;
 
-    @Ignore
-    public MovieEntry(int movieId,
+
+    public MovieEntry(int id,
                       String voteAverage,
                       String originalTitle,
                       String backdropPath,
@@ -31,7 +32,7 @@ public class MovieEntry {
                       String releaseDate,
                       String posterPath, Date updated_at)
     {
-        this.movieId = movieId;
+        this.id = id;
         this.voteAverage = voteAverage;
         this.originalTitle = originalTitle;
         this.backdropPath = backdropPath;
@@ -40,7 +41,7 @@ public class MovieEntry {
         this.posterPath = posterPath;
         this.updated_at = updated_at;
     }
-
+  /*
     //Constructor 2
     public MovieEntry(int id, int movieId,
                  String voteAverage,
@@ -60,7 +61,7 @@ public class MovieEntry {
         this.posterPath = posterPath;
         this.updated_at = updated_at;
     }
-
+*/
 
     public int getId() {
         return id;
@@ -70,13 +71,6 @@ public class MovieEntry {
         this.id = id;
     }
 
-    public int getMovieId() {
-        return movieId;
-    }
-
-    public void setMovieId(int movieId) {
-        this.movieId = movieId;
-    }
 
     public String getVoteAverage() {
         return voteAverage;

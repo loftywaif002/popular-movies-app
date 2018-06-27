@@ -3,6 +3,7 @@ package com.app.cinema.cinema.MovieDetails;
 import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -28,6 +29,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.app.cinema.cinema.Dashboard;
 import com.app.cinema.cinema.Movie;
 import com.app.cinema.cinema.MovieComponents.Reviews;
 import com.app.cinema.cinema.MovieComponents.Trailers;
@@ -46,7 +48,7 @@ import butterknife.BindViews;
 import butterknife.ButterKnife;
 
 public class MovieDetailFragment extends Fragment implements
-        TrailerAdapter.OnItemClickListener, TrailersTask.Listener, ReviewsTask.Listener, ReviewAdapter.OnItemClickListener{
+        TrailerAdapter.OnItemClickListener, TrailersTask.Listener, ReviewsTask.Listener, ReviewAdapter.OnItemClickListener {
 
     public static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
 
@@ -54,13 +56,11 @@ public class MovieDetailFragment extends Fragment implements
     public static final String EXTRA_TRAILERS = "EXTRA_TRAILERS";
     public static final String EXTRA_REVIEWS = "EXTRA_REVIEWS";
 
-    public static Boolean isFavorite = false;
-
     private Movie mMovie;
     private TrailerAdapter mTrailerListAdapter;
     private ReviewAdapter mReviewAdapter;
     private ShareActionProvider mShareActionProvider;
-    private static MovieDatabase mDb;
+    public static MovieDatabase mDb;
     private LiveData<List<Movie>> movies;
     public static List<Movie> updated_list;   //This is updated favorite movie list
 
@@ -87,10 +87,11 @@ public class MovieDetailFragment extends Fragment implements
     @BindView(R.id.button_remove_from_favorites)
     Button mButtonRemoveFromFavorites;
 
-    @BindViews({ R.id.rating_first_star, R.id.rating_second_star, R.id.rating_third_star,R.id.rating_fourth_star, R.id.rating_fifth_star })
+    @BindViews({R.id.rating_first_star, R.id.rating_second_star, R.id.rating_third_star, R.id.rating_fourth_star, R.id.rating_fifth_star})
     List<ImageView> ratingStarViews;
 
     public MovieDetailFragment() {
+
     }
 
 
@@ -102,6 +103,8 @@ public class MovieDetailFragment extends Fragment implements
             mMovie = getArguments().getParcelable(ARG_MOVIE);
         }
         setHasOptionsMenu(true);
+
+
     }
 
     @Override
@@ -140,29 +143,37 @@ public class MovieDetailFragment extends Fragment implements
                 .config(Bitmap.Config.RGB_565)
                 .into(mMoviePosterView);
 
-        update_rating_stars();
-
-        updateFavorites(); //Deals to Room
 
         load_trailers(savedInstanceState);
         load_reviews(savedInstanceState);
 
+        update_rating_stars();
+
+
         //Database
         mDb = MovieDatabase.getsInstance(getContext());
-        Log.d(LOG_TAG,"Getting all movies from database");
+        Log.d(LOG_TAG, "Getting all movies from database");
+
         movies = mDb.movieDao().loadFavoriteMovies();
         movies.observe(this, new Observer<List<Movie>>() {
             @Override
             public void onChanged(@Nullable List<Movie> movies) {
                 updated_list = movies;
-                Log.d(LOG_TAG,"updated list size"+updated_list.size());
+                Log.d(LOG_TAG, "updated list size" + updated_list.size());
             }
         });
-        Log.d(LOG_TAG,"Current selected movie id is: "+String.valueOf(mMovie.getId()));
-        //updateFavorites();
+        updateFavorites();
+
+        Log.d(LOG_TAG, "Current selected movie id is: " + String.valueOf(mMovie.getId()));
+
         return rootView;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateFavorites();
+    }
 
     private void load_reviews(Bundle savedInstanceState) {
         // List of reviews (Vertically Arranged)
@@ -171,7 +182,7 @@ public class MovieDetailFragment extends Fragment implements
 
         // Request for the reviews if only savedInstanceState == null
         if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_REVIEWS)) {
-           List<Reviews> reviews = savedInstanceState.getParcelableArrayList(EXTRA_REVIEWS);
+            List<Reviews> reviews = savedInstanceState.getParcelableArrayList(EXTRA_REVIEWS);
             mReviewAdapter.add(reviews);
         } else {
             getReviews();
@@ -213,10 +224,10 @@ public class MovieDetailFragment extends Fragment implements
 
 
     private void getTrailers() {
-        if(NetworkUtils.networkStatus(getContext())){
+        if (NetworkUtils.networkStatus(getContext())) {
             TrailersTask task = new TrailersTask((TrailersTask.Listener) MovieDetailFragment.this);
-            task.execute((long)mMovie.getId());
-        }else{
+            task.execute((long) mMovie.getId());
+        } else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
             dialog.setTitle(getString(R.string.title_network_alert));
             dialog.setMessage(getString(R.string.message_network_alert));
@@ -226,22 +237,22 @@ public class MovieDetailFragment extends Fragment implements
     }
 
     private void getReviews() {
-        ReviewsTask task = new ReviewsTask((ReviewsTask.Listener)MovieDetailFragment.this);
-        task.execute((long)mMovie.getId());
+        ReviewsTask task = new ReviewsTask((ReviewsTask.Listener) MovieDetailFragment.this);
+        task.execute((long) mMovie.getId());
     }
 
-   /*Implemented method from TrailerTask Class*/
+    /*Implemented method from TrailerTask Class*/
     @Override
-    public void onLoadFinished(List<Trailers> trailers){
-            mTrailerListAdapter.add(trailers);
-            mButtonWatchTrailer.setEnabled(!trailers.isEmpty());
-            if (mTrailerListAdapter.getItemCount() > 0) {
-                Trailers trailer = mTrailerListAdapter.getTrailers().get(0);
-                if(trailer !=null){
-                    //refresh_share_action_provider(trailer);
-                }
+    public void onLoadFinished(List<Trailers> trailers) {
+        mTrailerListAdapter.add(trailers);
+        mButtonWatchTrailer.setEnabled(!trailers.isEmpty());
+        if (mTrailerListAdapter.getItemCount() > 0) {
+            Trailers trailer = mTrailerListAdapter.getTrailers().get(0);
+            if (trailer != null) {
+                //refresh_share_action_provider(trailer);
             }
         }
+    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -264,7 +275,7 @@ public class MovieDetailFragment extends Fragment implements
     /*Implemented method from ReviewsTask Class*/
     @Override
     public void on_reviews_loaded(List<Reviews> reviews) {
-             mReviewAdapter.add(reviews);
+        mReviewAdapter.add(reviews);
     }
 
     private void update_rating_stars() {
@@ -290,7 +301,7 @@ public class MovieDetailFragment extends Fragment implements
 
 
     public void mark_as_favorite() {
-        Log.d(LOG_TAG,"Calling check for favorite method");
+        Log.d(LOG_TAG, "Calling check for favorite method");
 
 
         new AsyncTask<Void, Void, Void>() {
@@ -299,8 +310,8 @@ public class MovieDetailFragment extends Fragment implements
             protected Void doInBackground(Void... params) {
                 if (!check_for_favorite()) {
 
-                  //Store movie object to the database
-                    Log.d(LOG_TAG,"So creating new movieEntry object and storing it!");
+                    //Store movie object to the database
+                    Log.d(LOG_TAG, "So creating new movieEntry object and storing it!");
                     final Date date = new Date();
                     MovieEntry movieEntry = new MovieEntry(
                             mMovie.getId(),
@@ -312,7 +323,7 @@ public class MovieDetailFragment extends Fragment implements
                             mMovie.getPosterPath(),
                             date);
                     mDb.movieDao().insertMovie(movieEntry);
-                    Log.d(LOG_TAG,"Was not marked as Favorite, so Marked it!");
+                    Log.d(LOG_TAG, "Was not marked as Favorite, so Marked it!");
 
                 }
                 return null;
@@ -320,7 +331,7 @@ public class MovieDetailFragment extends Fragment implements
 
             @Override
             protected void onPostExecute(Void v) {
-                Log.d(LOG_TAG,"Calling uupdate Favorites, inside markasfavorite");
+                Log.d(LOG_TAG, "Calling uupdate Favorites, inside markasfavorite");
                 updateFavorites();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -353,13 +364,13 @@ public class MovieDetailFragment extends Fragment implements
 
             @Override
             protected Boolean doInBackground(Void... params) {
-                Log.d(LOG_TAG,"Calling uupdate Favorites, inside updateFavorites");
+                Log.d(LOG_TAG, "Calling uupdate Favorites, inside updateFavorites");
                 return check_for_favorite();
             }
 
             @Override
             protected void onPostExecute(Boolean favorite) {
-                Log.d(LOG_TAG,"Inside update favorite: "+ favorite);
+                Log.d(LOG_TAG, "Inside update favorite: " + favorite);
                 if (favorite) {
                     mButtonRemoveFromFavorites.setVisibility(View.VISIBLE);
                     mButtonMarkAsFavorite.setVisibility(View.GONE);
@@ -409,47 +420,24 @@ public class MovieDetailFragment extends Fragment implements
         startActivity(new Intent(Intent.ACTION_VIEW,
                 Uri.parse(review.getmUrl())));
     }
-/*
-    private boolean check_for_id( MovieEntry movieEntry){
-        if(movieEntry!=null){
-            if(movieEntry.getId()==mMovie.getId()){
-                isFavorite = true;
-            }else{
-                isFavorite = false;
+
+    private boolean check_for_favorite() {
+        //Check the database if this is already in the list
+        MovieEntry movieEntry;
+        movieEntry = mDb.movieDao().loadMovieById(mMovie.getId());
+        if (updated_list != null) {
+            for (Movie movie : updated_list) {
+                //Log.d(LOG_TAG,"Found movie titles from database: "+String.valueOf(movie.getOriginalTitle()));
+                if (mMovie.getId() == movie.getId()) {
+                    Log.d(LOG_TAG, "Current movie id: " + String.valueOf(mMovie.getId()));
+                    Log.d(LOG_TAG, "Found movie id from database: " + String.valueOf(movie.getId()));
+                    Log.d(LOG_TAG, "Both titles are matching");
+                    return true;
+                }
             }
         }
-        return false;
+       return false;
     }
-*/
-    private Boolean check_for_favorite() {
-        //Check the database if this is already in the list
-        //Reading Data
-        //final Boolean[] isFavorite = {false};
-        new AsyncTask<Void,Void,Void>(){
 
-            @Override
-            protected Void doInBackground(Void... voids) {
-                Log.d(LOG_TAG,"Querying for current movie in database");
-                //MovieEntry movieEntry;
-                //movieEntry = mDb.movieDao().loadMovieById(mMovie.getId());
-                Log.d(LOG_TAG,"Current selected movie title : "+String.valueOf(mMovie.getOriginalTitle()));
-                if(updated_list!=null){
-                    for(Movie movie : updated_list ) {
-                        Log.d(LOG_TAG,"Found movie titles from database: "+String.valueOf(movie.getOriginalTitle()));
-                        if(mMovie.getOriginalTitle().equals(movie.getOriginalTitle())){
-                            Log.d(LOG_TAG,"Current movie title: "+String.valueOf(mMovie.getOriginalTitle()));
-                            Log.d(LOG_TAG,"Found movie title from database: "+String.valueOf(movie.getOriginalTitle()));
-                            Log.d(LOG_TAG,"Both titles are matching");
-                            isFavorite = true;
-                            Log.d(LOG_TAG,"Value of isFavorite is: "+String.valueOf(isFavorite));
-                        }
-                    }
-                }
-
-                return null;
-            }
-        }.execute();
-        return isFavorite;
-    }
 
 }

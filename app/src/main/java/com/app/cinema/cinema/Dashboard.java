@@ -54,13 +54,15 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
 
     ArrayList<Movie> mPopularList;
     ArrayList<Movie> mTopTopRatedList;
+    List<Movie> updated_movie_list = new ArrayList<Movie>();
 
     private MovieAdapter mAdapter;
 
     private String mSortBy = FetchMovies.POPULAR;
 
-    private MovieDatabase mDb;
-
+    public static MovieDatabase mDb;
+    public static LiveData<List<Movie>> movies;
+    public static List<Movie> updated_list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +91,22 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
 
         // Large-screen
         tabletView = findViewById(R.id.movie_detail_container) != null;
+        mDb = MovieDatabase.getsInstance(getApplicationContext());
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        movies = mDb.movieDao().loadFavoriteMovies();
+        movies.observe(this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(@Nullable List<Movie> movies) {
+                updated_list = movies;
+                Log.d(TAG,"updated list size"+updated_list.size());
+            }
+        });
+        //Adding all movies to array list
 
     }
 
@@ -149,12 +166,21 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
             movie_grid_recyclerView.setAdapter(mAdapter);
             break;
             case FetchMovies.FAVORITES:
-
+                for (Movie movie: updated_list){
+                    updated_movie_list.add(movie);
+                }
+                if(updated_movie_list!=null){
+                    mAdapter = new MovieAdapter(new ArrayList<Movie>(),this);
+                    mAdapter.add(updated_movie_list);
+                    movie_grid_recyclerView.setAdapter(mAdapter);
+                }
             break;
         }
 
 
     }
+
+
 
     public void send_details(Movie movie, int position) {
         if (tabletView) {
@@ -186,6 +212,7 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
 
             popularMoviesURL = "https://api.themoviedb.org/3/movie/popular?api_key="+myApiKey+"&language=en-US";
             topRatedMoviesURL = "https://api.themoviedb.org/3/movie/top_rated?api_key="+myApiKey+"&language=en-US";
+
 
 
             mPopularList = new ArrayList<>();

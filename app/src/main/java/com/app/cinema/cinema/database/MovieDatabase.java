@@ -9,7 +9,7 @@ import android.arch.persistence.room.migration.Migration;
 import android.content.Context;
 import android.util.Log;
 
-@Database(entities = {MovieEntry.class}, version = 5, exportSchema = false)
+@Database(entities = {MovieEntry.class}, version = 7, exportSchema = false)
 @TypeConverters({DateConverter.class})
 public abstract class MovieDatabase extends RoomDatabase{
 
@@ -24,7 +24,7 @@ public abstract class MovieDatabase extends RoomDatabase{
                 Log.d(LOG_TAG,"Creating new database instance");
                 sInstance = Room.databaseBuilder(context.getApplicationContext(),
                         MovieDatabase.class,MovieDatabase.DATABSE_NAME)
-                        .addMigrations(MIGRATION_4_5)
+                        .addMigrations(MIGRATION_6_7)
                         .build();
             }
         }
@@ -32,7 +32,7 @@ public abstract class MovieDatabase extends RoomDatabase{
         return sInstance;
     }
 
-    static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+    static final Migration MIGRATION_6_7 = new Migration(6, 7) {
         @Override
         public void migrate(SupportSQLiteDatabase database) {
            // Since we didn't alter the table, there's nothing else to do here.
