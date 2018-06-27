@@ -425,16 +425,16 @@ public class MovieDetailFragment extends Fragment implements
         //Check the database if this is already in the list
         MovieEntry movieEntry;
         movieEntry = mDb.movieDao().loadMovieById(mMovie.getId());
-        if (updated_list != null) {
-            for (Movie movie : updated_list) {
+        if (movieEntry != null) {
+            //for (Movie movie : ) {
                 //Log.d(LOG_TAG,"Found movie titles from database: "+String.valueOf(movie.getOriginalTitle()));
-                if (mMovie.getId() == movie.getId()) {
+                if (mMovie.getId() == movieEntry.getId()) {
                     Log.d(LOG_TAG, "Current movie id: " + String.valueOf(mMovie.getId()));
-                    Log.d(LOG_TAG, "Found movie id from database: " + String.valueOf(movie.getId()));
-                    Log.d(LOG_TAG, "Both titles are matching");
+                    Log.d(LOG_TAG, "Found movie id from database: " + String.valueOf(movieEntry.getId()));
+                    Log.d(LOG_TAG, "Both ids are matching");
                     return true;
                 }
-            }
+           // }
         }
        return false;
     }
