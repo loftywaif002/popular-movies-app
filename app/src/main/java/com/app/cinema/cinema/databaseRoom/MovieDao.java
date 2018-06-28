@@ -1,4 +1,4 @@
-package com.app.cinema.cinema.database;
+package com.app.cinema.cinema.databaseRoom;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;

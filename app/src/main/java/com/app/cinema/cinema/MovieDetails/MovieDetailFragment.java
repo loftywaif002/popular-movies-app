@@ -3,7 +3,6 @@ package com.app.cinema.cinema.MovieDetails;
 import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -29,13 +28,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.app.cinema.cinema.Dashboard;
 import com.app.cinema.cinema.Movie;
 import com.app.cinema.cinema.MovieComponents.Reviews;
 import com.app.cinema.cinema.MovieComponents.Trailers;
 import com.app.cinema.cinema.R;
-import com.app.cinema.cinema.database.MovieDatabase;
-import com.app.cinema.cinema.database.MovieEntry;
+import com.app.cinema.cinema.databaseRoom.MovieDatabase;
+import com.app.cinema.cinema.databaseRoom.MovieEntry;
 import com.app.cinema.cinema.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
 

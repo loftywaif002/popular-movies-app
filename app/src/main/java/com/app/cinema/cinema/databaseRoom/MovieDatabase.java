@@ -1,4 +1,4 @@
-package com.app.cinema.cinema.database;
+package com.app.cinema.cinema.databaseRoom;
 
 import android.arch.persistence.db.SupportSQLiteDatabase;
 import android.arch.persistence.room.Database;

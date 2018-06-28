@@ -18,17 +18,14 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.app.cinema.cinema.MovieDetails.MovieDetailActivity;
 import com.app.cinema.cinema.MovieDetails.MovieDetailFragment;
-import com.app.cinema.cinema.database.MovieDatabase;
-import com.app.cinema.cinema.database.MovieEntry;
+import com.app.cinema.cinema.databaseRoom.MovieDatabase;
 import com.app.cinema.cinema.utilities.NetworkUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -72,7 +69,8 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
         setContentView(R.layout.activity_dashboard);
         ButterKnife.bind(this);
         mProgressBar.setVisibility(View.INVISIBLE); //Hide Progressbar by Default
-        //Creating new Database for movies
+        //Dealing with View Model
+
 
         if(NetworkUtils.networkStatus(Dashboard.this)){
             new FetchMovies().execute();
@@ -92,12 +90,6 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
         // Large-screen
         tabletView = findViewById(R.id.movie_detail_container) != null;
         mDb = MovieDatabase.getsInstance(getApplicationContext());
-
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
         movies = mDb.movieDao().loadFavoriteMovies();
         movies.observe(this, new Observer<List<Movie>>() {
             @Override
@@ -106,10 +98,22 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
                 Log.d(TAG,"updated list size"+updated_list.size());
             }
         });
-        //Adding all movies to array list
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        //Adding all movies to array list
+        update_empty_state();
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -154,6 +158,7 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
     }
 
     private void refreshList(String sort_by) {
+
         switch (sort_by){
             case FetchMovies.POPULAR:
             mAdapter = new MovieAdapter(new ArrayList<Movie>(),this);
@@ -243,6 +248,21 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
             mAdapter = new MovieAdapter(new ArrayList<Movie>(),Dashboard.this);
             mAdapter.add(mPopularList);
             movie_grid_recyclerView.setAdapter(mAdapter);
+        }
+    }
+
+    private void update_empty_state() {
+        if (mAdapter.getItemCount() == 0) {
+            if (mSortBy.equals(FetchMovies.FAVORITES)) {
+                findViewById(R.id.empty_state_container).setVisibility(View.GONE);
+                findViewById(R.id.empty_state_favorites_container).setVisibility(View.VISIBLE);
+            } else {
+                findViewById(R.id.empty_state_container).setVisibility(View.VISIBLE);
+                findViewById(R.id.empty_state_favorites_container).setVisibility(View.GONE);
+            }
+        } else {
+            findViewById(R.id.empty_state_container).setVisibility(View.GONE);
+            findViewById(R.id.empty_state_favorites_container).setVisibility(View.GONE);
         }
     }
 }

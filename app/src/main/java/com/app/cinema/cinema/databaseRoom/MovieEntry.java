@@ -1,8 +1,7 @@
-package com.app.cinema.cinema.database;
+package com.app.cinema.cinema.databaseRoom;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 import java.util.Date;
@@ -43,7 +42,7 @@ public class MovieEntry {
     }
   /*
     //Constructor 2
-    public MovieEntry(int id, int movieId,
+    public MovieContract(int id, int movieId,
                  String voteAverage,
                  String originalTitle,
                  String backdropPath,
