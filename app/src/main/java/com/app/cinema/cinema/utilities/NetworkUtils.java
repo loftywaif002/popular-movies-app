@@ -60,7 +60,7 @@ public class NetworkUtils {
             for (int i = 0; i < resArray.length(); i++) {
                 JSONObject jsonObject = resArray.getJSONObject(i);
                 Movie movie = new Movie(); //New Movie object
-                movie.setId(jsonObject.getInt("id"));
+                movie.setId(jsonObject.getLong("id"));
                 movie.setVoteAverage(jsonObject.getString("vote_average"));
                 movie.setOriginalTitle(jsonObject.getString("original_title"));
                 movie.setBackdropPath(jsonObject.getString("backdrop_path"));

@@ -3,9 +3,11 @@ package com.app.cinema.cinema;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +22,7 @@ import butterknife.ButterKnife;
 
 import com.app.cinema.cinema.MovieDetails.MovieDetailActivity;
 import com.app.cinema.cinema.MovieDetails.MovieDetailFragment;
+import com.app.cinema.cinema.databaseSQLITE.MovieContract;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -63,6 +66,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         MovieViewHolder viewHolder = new MovieViewHolder(view);
         return viewHolder;
     }
+
+
 
     @Override
     public void onBindViewHolder(@NonNull final MovieViewHolder holder, int position) {
@@ -155,8 +160,30 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         notifyDataSetChanged();
     }
 
+    public void add(Cursor cursor) {
+
+        mMovies.clear();
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                long id = cursor.getLong(MovieContract.MovieEntry.COL_MOVIE_ID);
+                String v_average = cursor.getString(MovieContract.MovieEntry.COL_MOVIE_VOTE_AVERAGE);
+                String title = cursor.getString(MovieContract.MovieEntry.COL_MOVIE_TITLE);
+                String backdropPath = cursor.getString(MovieContract.MovieEntry.COL_MOVIE_BACKDROP_PATH);
+                String overview = cursor.getString(MovieContract.MovieEntry.COL_MOVIE_OVERVIEW);
+                String releaseDate = cursor.getString(MovieContract.MovieEntry.COL_MOVIE_RELEASE_DATE);
+                String posterPath = cursor.getString(MovieContract.MovieEntry.COL_MOVIE_POSTER_PATH);
+                Movie movie = new Movie(id,v_average,title,backdropPath,overview,releaseDate,posterPath);
+
+                mMovies.add(movie);
+            } while (cursor.moveToNext());
+
+        }
+        notifyDataSetChanged();
+    }
 
     public ArrayList<Movie> getMovies() {
         return mMovies;
     }
+
+
 }

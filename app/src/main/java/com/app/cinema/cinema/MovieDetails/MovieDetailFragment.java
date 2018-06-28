@@ -2,8 +2,9 @@ package com.app.cinema.cinema.MovieDetails;
 
 import android.app.Activity;
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -33,12 +34,11 @@ import com.app.cinema.cinema.MovieComponents.Reviews;
 import com.app.cinema.cinema.MovieComponents.Trailers;
 import com.app.cinema.cinema.R;
 import com.app.cinema.cinema.databaseRoom.MovieDatabase;
-import com.app.cinema.cinema.databaseRoom.MovieEntry;
+import com.app.cinema.cinema.databaseSQLITE.MovieContract;
 import com.app.cinema.cinema.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -63,9 +63,9 @@ public class MovieDetailFragment extends Fragment implements
     public static List<Movie> updated_list;   //This is updated favorite movie list
 
     @BindView(R.id.trailer_list)
-    RecyclerView mRecyclerViewForTrailers;
+    RecyclerView mRecyclerViewTrailers;
     @BindView(R.id.review_list)
-    RecyclerView mRecyclerViewForReviews;
+    RecyclerView mRecyclerViewReviews;
 
     @BindView(R.id.movie_title)
     TextView mMovieTitleView;
@@ -135,20 +135,35 @@ public class MovieDetailFragment extends Fragment implements
         mMovieTitleView.setText(mMovie.getOriginalTitle());
         mMovieOverviewView.setText(mMovie.getOverview());
         mMovieReleaseDateView.setText(mMovie.getReleaseDate());
-
         Picasso.get()
                 .load(mMovie.getPosterPath())
                 .config(Bitmap.Config.RGB_565)
                 .into(mMoviePosterView);
 
-
+        update_rating_stars();
+        updateFavorites();
         load_trailers(savedInstanceState);
         load_reviews(savedInstanceState);
+        Log.d(LOG_TAG,MovieContract.MovieEntry.CONTENT_URI.toString());
+        /*IF savedInstanceState == null*/
 
-        update_rating_stars();
+        if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_TRAILERS)) {
+            List<Trailers> trailers = savedInstanceState.getParcelableArrayList(EXTRA_TRAILERS);
+            mTrailerListAdapter.add(trailers);
+            mButtonWatchTrailer.setEnabled(true);
+        } else {
+            getTrailers();
+        }
 
-
-        //Database
+        if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_REVIEWS)) {
+            List<Reviews> reviews = savedInstanceState.getParcelableArrayList(EXTRA_REVIEWS);
+            mReviewAdapter.add(reviews);
+        } else {
+            getReviews();
+        }
+        /*IF savedInstanceState == null*/
+        //Room Database TEST
+       /*
         mDb = MovieDatabase.getsInstance(getContext());
         Log.d(LOG_TAG, "Getting all movies from database");
 
@@ -160,52 +175,11 @@ public class MovieDetailFragment extends Fragment implements
                 Log.d(LOG_TAG, "updated list size" + updated_list.size());
             }
         });
-        updateFavorites();
-
+       */
         Log.d(LOG_TAG, "Current selected movie id is: " + String.valueOf(mMovie.getId()));
 
         return rootView;
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateFavorites();
-    }
-
-    private void load_reviews(Bundle savedInstanceState) {
-        // List of reviews (Vertically Arranged)
-        mReviewAdapter = new ReviewAdapter(new ArrayList<Reviews>(), this);
-        mRecyclerViewForReviews.setAdapter(mReviewAdapter);
-
-        // Request for the reviews if only savedInstanceState == null
-        if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_REVIEWS)) {
-            List<Reviews> reviews = savedInstanceState.getParcelableArrayList(EXTRA_REVIEWS);
-            mReviewAdapter.add(reviews);
-        } else {
-            getReviews();
-        }
-    }
-
-    private void load_trailers(Bundle savedInstanceState) {
-        //List of Trailers (Horizontal Layout)
-        LinearLayoutManager layoutManager
-                = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        mRecyclerViewForTrailers.setLayoutManager(layoutManager);
-        mTrailerListAdapter = new TrailerAdapter(new ArrayList<Trailers>(), this);
-        mRecyclerViewForTrailers.setAdapter(mTrailerListAdapter);
-        mRecyclerViewForTrailers.setNestedScrollingEnabled(false);
-
-        //  Request for the trailers if only savedInstanceState == null
-        if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_TRAILERS)) {
-            List<Trailers> trailers = savedInstanceState.getParcelableArrayList(EXTRA_TRAILERS);
-            mTrailerListAdapter.add(trailers);
-            mButtonWatchTrailer.setEnabled(true);
-        } else {
-            getTrailers();
-        }
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -220,11 +194,51 @@ public class MovieDetailFragment extends Fragment implements
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateFavorites();
+    }
+
+    private void load_reviews(Bundle savedInstanceState) {
+        // List of reviews (Vertically Arranged)
+        mReviewAdapter = new ReviewAdapter(new ArrayList<Reviews>(), this);
+        mRecyclerViewReviews.setAdapter(mReviewAdapter);
+
+        // Request for the reviews if only savedInstanceState == null
+        if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_REVIEWS)) {
+            List<Reviews> reviews = savedInstanceState.getParcelableArrayList(EXTRA_REVIEWS);
+            mReviewAdapter.add(reviews);
+        } else {
+            getReviews();
+        }
+    }
+
+    private void load_trailers(Bundle savedInstanceState) {
+        //List of Trailers (Horizontal Layout)
+        LinearLayoutManager layoutManager
+                = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        mRecyclerViewTrailers.setLayoutManager(layoutManager);
+        mTrailerListAdapter = new TrailerAdapter(new ArrayList<Trailers>(), this);
+        mRecyclerViewTrailers.setAdapter(mTrailerListAdapter);
+        mRecyclerViewTrailers.setNestedScrollingEnabled(false);
+
+        //  Request for the trailers if only savedInstanceState == null
+        if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_TRAILERS)) {
+            List<Trailers> trailers = savedInstanceState.getParcelableArrayList(EXTRA_TRAILERS);
+            mTrailerListAdapter.add(trailers);
+            mButtonWatchTrailer.setEnabled(true);
+        } else {
+            getTrailers();
+        }
+    }
+
+
 
     private void getTrailers() {
         if (NetworkUtils.networkStatus(getContext())) {
             TrailersTask task = new TrailersTask((TrailersTask.Listener) MovieDetailFragment.this);
-            task.execute((long) mMovie.getId());
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,  mMovie.getId());
         } else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
             dialog.setTitle(getString(R.string.title_network_alert));
@@ -236,7 +250,7 @@ public class MovieDetailFragment extends Fragment implements
 
     private void getReviews() {
         ReviewsTask task = new ReviewsTask((ReviewsTask.Listener) MovieDetailFragment.this);
-        task.execute((long) mMovie.getId());
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mMovie.getId());
     }
 
     /*Implemented method from TrailerTask Class*/
@@ -247,7 +261,7 @@ public class MovieDetailFragment extends Fragment implements
         if (mTrailerListAdapter.getItemCount() > 0) {
             Trailers trailer = mTrailerListAdapter.getTrailers().get(0);
             if (trailer != null) {
-                //refresh_share_action_provider(trailer);
+                refresh_share_action_provider(trailer);
             }
         }
     }
@@ -307,7 +321,7 @@ public class MovieDetailFragment extends Fragment implements
             @Override
             protected Void doInBackground(Void... params) {
                 if (!check_for_favorite()) {
-
+                   /*
                     //Store movie object to the database
                     Log.d(LOG_TAG, "So creating new movieEntry object and storing it!");
                     final Date date = new Date();
@@ -321,6 +335,21 @@ public class MovieDetailFragment extends Fragment implements
                             mMovie.getPosterPath(),
                             date);
                     mDb.movieDao().insertMovie(movieEntry);
+                    Log.d(LOG_TAG, "Was not marked as Favorite, so Marked it!");
+                  */
+                   ContentValues movie_data = new ContentValues();
+                    movie_data.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+                            mMovie.getId());
+                    movie_data.put(MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVERAGE,mMovie.getVoteAverage());
+                    movie_data.put(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE,mMovie.getOriginalTitle());
+                    movie_data.put(MovieContract.MovieEntry.COLUMN_MOVIE_BACKDROP_PATH, mMovie.getBackdropPath());
+                    movie_data.put(MovieContract.MovieEntry.COLUMN_MOVIE_OVERVIEW, mMovie.getOverview());
+                    movie_data.put(MovieContract.MovieEntry.COLUMN_MOVIE_RELEASE_DATE, mMovie.getReleaseDate());
+                    movie_data.put(MovieContract.MovieEntry.COLUMN_MOVIE_POSTER_PATH, mMovie.getPosterPath());
+                    getContext().getContentResolver().insert(
+                            MovieContract.MovieEntry.CONTENT_URI,
+                            movie_data
+                    );
                     Log.d(LOG_TAG, "Was not marked as Favorite, so Marked it!");
 
                 }
@@ -342,7 +371,10 @@ public class MovieDetailFragment extends Fragment implements
             @Override
             protected Void doInBackground(Void... params) {
                 if (check_for_favorite()) {
-                    mDb.movieDao().deleteMovieById(mMovie.getId());
+                    //mDb.movieDao().deleteMovieById(mMovie.getId());
+
+                    getContext().getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI,
+                            MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = " + mMovie.getId(), null);
 
                 }
                 return null;
@@ -421,6 +453,7 @@ public class MovieDetailFragment extends Fragment implements
 
     private boolean check_for_favorite() {
         //Check the database if this is already in the list
+      /*
         MovieEntry movieEntry;
         movieEntry = mDb.movieDao().loadMovieById(mMovie.getId());
         if (movieEntry != null) {
@@ -435,6 +468,22 @@ public class MovieDetailFragment extends Fragment implements
            // }
         }
        return false;
+       */
+
+        //Using SQLite
+            Cursor movieCursor = getContext().getContentResolver().query(
+                    MovieContract.MovieEntry.CONTENT_URI,
+                    new String[]{MovieContract.MovieEntry.COLUMN_MOVIE_ID},
+                    MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = " + mMovie.getId(),
+                    null,
+                    null);
+
+            if (movieCursor != null && movieCursor.moveToFirst()) {
+                movieCursor.close();
+                return true;
+            } else {
+                return false;
+            }
     }
 
 

@@ -20,8 +20,7 @@
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toTopOf="parent"/>
 
-     <include layout="@layout/empty_state_container" />
-	<include layout="@layout/empty_state_favorites" />
+
 
 	<android.support.v7.widget.RecyclerView
 		xmlns:android="http://schemas.android.com/apk/res/android"
@@ -33,5 +32,8 @@
 		android:scrollbars="vertical"
 		tools:listitem="@layout/movie_item"
 		app:layoutManager="android.support.v7.widget.LinearLayoutManager"/>
+
+	<include layout="@layout/empty_state_container" />
+	<include layout="@layout/empty_state_favorites" />
 
 </FrameLayout>

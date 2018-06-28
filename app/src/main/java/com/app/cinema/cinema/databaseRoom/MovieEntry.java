@@ -12,7 +12,7 @@ public class MovieEntry {
 
 
     @PrimaryKey
-    private int id;
+    private long id;
     private String voteAverage;
     private String originalTitle;
     private String backdropPath;
@@ -23,7 +23,7 @@ public class MovieEntry {
     private Date updated_at;
 
 
-    public MovieEntry(int id,
+    public MovieEntry(long id,
                       String voteAverage,
                       String originalTitle,
                       String backdropPath,
@@ -62,11 +62,11 @@ public class MovieEntry {
     }
 */
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

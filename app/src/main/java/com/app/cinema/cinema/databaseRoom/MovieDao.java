@@ -12,7 +12,7 @@ import android.arch.persistence.room.Update;
 import com.app.cinema.cinema.Movie;
 
 import java.util.List;
-
+//Not Using ROOM
 @Dao
 public interface MovieDao {
     @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH)
@@ -30,10 +30,10 @@ public interface MovieDao {
     void deleteMovie(MovieEntry movieEntry);
 
     @Query("SELECT * FROM movie WHERE id = :id")
-    MovieEntry loadMovieById(int id);
+    MovieEntry loadMovieById(long id);
 
     @Query("DELETE FROM movie WHERE id = :id")
-    void deleteMovieById(int id);
+    void deleteMovieById(long id);
 
     @Query("DELETE FROM movie")
     void delete();

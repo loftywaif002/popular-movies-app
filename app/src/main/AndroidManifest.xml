@@ -21,10 +21,17 @@
         </activity>
         <activity android:name=".Dashboard"></activity>
         <activity android:name=".MovieDetails.MovieDetailActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar">
+
+
+        </activity>
         <meta-data
             android:name="android.support.PARENT_ACTIVITY"
             android:value="com.app.cinema.cinema.Dashboard" />
+        <provider
+            android:name=".databaseSQLITE.MoviesProvider"
+            android:exported="true"
+            android:authorities="com.app.cinema.cinema" />
     </application>
 
 </manifest>

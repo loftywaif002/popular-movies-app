@@ -1,16 +1,19 @@
 package com.app.cinema.cinema;
 
+
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
+
 import android.content.Intent;
+import android.database.Cursor;
+import android.support.v4.content.CursorLoader;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
+import android.support.v4.app.LoaderManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -22,6 +25,7 @@ import android.widget.ProgressBar;
 import com.app.cinema.cinema.MovieDetails.MovieDetailActivity;
 import com.app.cinema.cinema.MovieDetails.MovieDetailFragment;
 import com.app.cinema.cinema.databaseRoom.MovieDatabase;
+import com.app.cinema.cinema.databaseSQLITE.MovieContract;
 import com.app.cinema.cinema.utilities.NetworkUtils;
 
 import java.io.IOException;
@@ -32,14 +36,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemClickListener{
+public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemClickListener, LoaderManager.LoaderCallbacks<Cursor>{
 
     private static final String TAG = Dashboard.class.getSimpleName();
 
     private boolean tabletView;
 
     String myApiKey = BuildConfig.API_KEY;
-
+    private static final int FAVORITE_MOVIES_LOADER = 0;
     @BindView(R.id.recycled_movie_grid)
     RecyclerView movie_grid_recyclerView;
 
@@ -57,9 +61,14 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
 
     private String mSortBy = FetchMovies.POPULAR;
 
+    private static final String EXTRA_MOVIES = "EXTRA_MOVIES";
+    private static final String EXTRA_SORT_BY = "EXTRA_SORT_BY";
+
     public static MovieDatabase mDb;
     public static LiveData<List<Movie>> movies;
     public static List<Movie> updated_list;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,24 +80,40 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
         mProgressBar.setVisibility(View.INVISIBLE); //Hide Progressbar by Default
         //Dealing with View Model
 
-
-        if(NetworkUtils.networkStatus(Dashboard.this)){
-            new FetchMovies().execute();
-        }else{
-            AlertDialog.Builder dialog = new AlertDialog.Builder(Dashboard.this);
-            dialog.setTitle(getString(R.string.title_network_alert));
-            dialog.setMessage(getString(R.string.message_network_alert));
-            dialog.setCancelable(false);
-            dialog.show();
-        }
         //Define recyclerView Layout
         movie_grid_recyclerView.setLayoutManager(new GridLayoutManager(this, getResources()
                 .getInteger(R.integer.number_of_grid_columns)));
         mAdapter = new MovieAdapter(new ArrayList<Movie>(), this);
         movie_grid_recyclerView.setAdapter(mAdapter);
-
         // Large-screen
         tabletView = findViewById(R.id.movie_detail_container) != null;
+
+        if (savedInstanceState != null) {
+            mSortBy = savedInstanceState.getString(EXTRA_SORT_BY);
+            if (savedInstanceState.containsKey(EXTRA_MOVIES)) {
+                List<Movie> movies = savedInstanceState.getParcelableArrayList(EXTRA_MOVIES);
+                mAdapter.add(movies);
+                findViewById(R.id.indeterminateBar).setVisibility(View.GONE);
+
+                // For listening content updates for tow pane mode
+                if (mSortBy.equals(FetchMovies.FAVORITES)) {
+                    getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER, null,this);
+                }
+            }
+            update_empty_state();
+        } else {
+            // Fetch Movies only if savedInstanceState == null
+            if(NetworkUtils.networkStatus(Dashboard.this)){
+                new FetchMovies().execute();
+            }else{
+                AlertDialog.Builder dialog = new AlertDialog.Builder(Dashboard.this);
+                dialog.setTitle(getString(R.string.title_network_alert));
+                dialog.setMessage(getString(R.string.message_network_alert));
+                dialog.setCancelable(false);
+                dialog.show();
+            }
+        }
+        /*
         mDb = MovieDatabase.getsInstance(getApplicationContext());
         movies = mDb.movieDao().loadFavoriteMovies();
         movies.observe(this, new Observer<List<Movie>>() {
@@ -98,6 +123,8 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
                 Log.d(TAG,"updated list size"+updated_list.size());
             }
         });
+        */
+
 
     }
 
@@ -105,14 +132,26 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
     protected void onStart() {
         super.onStart();
 
-        //Adding all movies to array list
-        update_empty_state();
     }
 
     @Override
     protected void onResume(){
         super.onResume();
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        ArrayList<Movie> movies = mAdapter.getMovies();
+        if (movies != null && !movies.isEmpty()) {
+            outState.putParcelableArrayList(EXTRA_MOVIES, movies);
+        }
+        outState.putString(EXTRA_SORT_BY, mSortBy);
+
+        if (!mSortBy.equals(FetchMovies.FAVORITES)) {
+            getSupportLoaderManager().destroyLoader(FAVORITE_MOVIES_LOADER);
+        }
     }
 
     @Override
@@ -138,11 +177,17 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sort_by_top_rated:
+                if (mSortBy.equals(FetchMovies.FAVORITES)) {
+                    getSupportLoaderManager().destroyLoader(FAVORITE_MOVIES_LOADER);
+                }
                 mSortBy = FetchMovies.TOP_RATED;
                 refreshList(mSortBy);
                 item.setChecked(true);
                 break;
             case R.id.sort_by_popular:
+                if (mSortBy.equals(FetchMovies.FAVORITES)) {
+                    getSupportLoaderManager().destroyLoader(FAVORITE_MOVIES_LOADER);
+                }
                 mSortBy = FetchMovies.POPULAR;
                 refreshList(mSortBy);
                 item.setChecked(true);
@@ -171,6 +216,7 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
             movie_grid_recyclerView.setAdapter(mAdapter);
             break;
             case FetchMovies.FAVORITES:
+              /*
                 for (Movie movie: updated_list){
                     updated_movie_list.add(movie);
                 }
@@ -179,6 +225,8 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
                     mAdapter.add(updated_movie_list);
                     movie_grid_recyclerView.setAdapter(mAdapter);
                 }
+               */
+                getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER, null, this);
             break;
         }
 
@@ -196,6 +244,30 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
             startActivity(intent);
         }
     }
+
+    @Override
+    public android.support.v4.content.Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        findViewById(R.id.indeterminateBar).setVisibility(View.VISIBLE);
+        return new CursorLoader(this,
+               MovieContract.MovieEntry.CONTENT_URI,
+                MovieContract.MovieEntry.MOVIE_COLUMNS,
+                null,
+                null,
+                null);
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull android.support.v4.content.Loader<Cursor> loader, Cursor data) {
+        mAdapter.add(data);
+        update_empty_state();
+        findViewById(R.id.indeterminateBar).setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull android.support.v4.content.Loader<Cursor> loader) {
+
+    }
+
 
 
     //AsyncTask
@@ -254,14 +326,14 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
     private void update_empty_state() {
         if (mAdapter.getItemCount() == 0) {
             if (mSortBy.equals(FetchMovies.FAVORITES)) {
-                findViewById(R.id.empty_state_container).setVisibility(View.GONE);
+                findViewById(R.id.empty_state).setVisibility(View.GONE);
                 findViewById(R.id.empty_state_favorites_container).setVisibility(View.VISIBLE);
             } else {
-                findViewById(R.id.empty_state_container).setVisibility(View.VISIBLE);
+                findViewById(R.id.empty_state).setVisibility(View.VISIBLE);
                 findViewById(R.id.empty_state_favorites_container).setVisibility(View.GONE);
             }
         } else {
-            findViewById(R.id.empty_state_container).setVisibility(View.GONE);
+            findViewById(R.id.empty_state).setVisibility(View.GONE);
             findViewById(R.id.empty_state_favorites_container).setVisibility(View.GONE);
         }
     }
