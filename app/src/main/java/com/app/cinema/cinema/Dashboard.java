@@ -1,8 +1,5 @@
 package com.app.cinema.cinema;
 
-
-import android.arch.lifecycle.LiveData;
-
 import android.content.Intent;
 import android.database.Cursor;
 import android.support.v4.content.CursorLoader;
@@ -25,7 +22,7 @@ import android.widget.ProgressBar;
 
 import com.app.cinema.cinema.MovieDetails.MovieDetailActivity;
 import com.app.cinema.cinema.MovieDetails.MovieDetailFragment;
-import com.app.cinema.cinema.databaseRoom.MovieDatabase;
+
 import com.app.cinema.cinema.databaseSQLITE.MovieContract;
 import com.app.cinema.cinema.utilities.NetworkUtils;
 
@@ -64,8 +61,6 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
 
     private static final String EXTRA_MOVIES = "EXTRA_MOVIES";
     private static final String EXTRA_SORT_BY = "EXTRA_SORT_BY";
-
-
 
 
     @Override
@@ -111,6 +106,15 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
                 dialog.show();
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mSortBy.equals(FetchMovies.FAVORITES)) {
+            getSupportLoaderManager().destroyLoader(FAVORITE_MOVIES_LOADER);
+        }
+        mSortBy = FetchMovies.POPULAR;
+        refreshList(mSortBy);
     }
 
     @Override
@@ -201,8 +205,8 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
             movie_grid_recyclerView.setAdapter(mAdapter);
             break;
             case FetchMovies.FAVORITES:
-                getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER, null, this);
-                break;
+            getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER, null, this);
+            break;
         }
 
 
@@ -255,6 +259,7 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
             super.onPreExecute();
             mProgressBar.setVisibility(View.VISIBLE);
         }
+
 
         @Override
         protected Void doInBackground(Void... voids) {

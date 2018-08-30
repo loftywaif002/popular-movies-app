@@ -12,7 +12,7 @@ import android.view.WindowManager;
 
 import com.app.cinema.cinema.Movie;
 import com.app.cinema.cinema.R;
-import com.app.cinema.cinema.databaseRoom.MovieDatabase;
+
 
 import java.util.List;
 
@@ -26,7 +26,6 @@ public class MovieDetailActivity extends AppCompatActivity {
     @BindView(R.id.detail_toolbar)
     Toolbar mToolbar;
 
-    public static MovieDatabase mDb;
     public static LiveData<List<Movie>> movies;
     public static List<Movie> updated_list;
 

@@ -33,7 +33,6 @@ import com.app.cinema.cinema.Movie;
 import com.app.cinema.cinema.MovieComponents.Reviews;
 import com.app.cinema.cinema.MovieComponents.Trailers;
 import com.app.cinema.cinema.R;
-import com.app.cinema.cinema.databaseRoom.MovieDatabase;
 import com.app.cinema.cinema.databaseSQLITE.MovieContract;
 import com.app.cinema.cinema.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
@@ -58,7 +57,6 @@ public class MovieDetailFragment extends Fragment implements
     private TrailerAdapter mTrailerListAdapter;
     private ReviewAdapter mReviewAdapter;
     private ShareActionProvider mShareActionProvider;
-    public static MovieDatabase mDb;
     private LiveData<List<Movie>> movies;
     public static List<Movie> updated_list;   //This is updated favorite movie list
 
@@ -101,8 +99,6 @@ public class MovieDetailFragment extends Fragment implements
             mMovie = getArguments().getParcelable(ARG_MOVIE);
         }
         setHasOptionsMenu(true);
-
-
     }
 
     @Override
@@ -123,9 +119,7 @@ public class MovieDetailFragment extends Fragment implements
                     .config(Bitmap.Config.RGB_565)
                     .into(movieBackdrop);
         }
-
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -161,21 +155,6 @@ public class MovieDetailFragment extends Fragment implements
         } else {
             getReviews();
         }
-        /*IF savedInstanceState == null*/
-        //Room Database TEST
-       /*
-        mDb = MovieDatabase.getsInstance(getContext());
-        Log.d(LOG_TAG, "Getting all movies from database");
-
-        movies = mDb.movieDao().loadFavoriteMovies();
-        movies.observe(this, new Observer<List<Movie>>() {
-            @Override
-            public void onChanged(@Nullable List<Movie> movies) {
-                updated_list = movies;
-                Log.d(LOG_TAG, "updated list size" + updated_list.size());
-            }
-        });
-       */
         Log.d(LOG_TAG, "Current selected movie id is: " + String.valueOf(mMovie.getId()));
 
         return rootView;
@@ -232,8 +211,6 @@ public class MovieDetailFragment extends Fragment implements
             getTrailers();
         }
     }
-
-
 
     private void getTrailers() {
         if (NetworkUtils.networkStatus(getContext())) {
@@ -453,23 +430,6 @@ public class MovieDetailFragment extends Fragment implements
 
     private boolean check_for_favorite() {
         //Check the database if this is already in the list
-      /*
-        MovieEntry movieEntry;
-        movieEntry = mDb.movieDao().loadMovieById(mMovie.getId());
-        if (movieEntry != null) {
-            //for (Movie movie : ) {
-                //Log.d(LOG_TAG,"Found movie titles from database: "+String.valueOf(movie.getOriginalTitle()));
-                if (mMovie.getId() == movieEntry.getId()) {
-                    Log.d(LOG_TAG, "Current movie id: " + String.valueOf(mMovie.getId()));
-                    Log.d(LOG_TAG, "Found movie id from database: " + String.valueOf(movieEntry.getId()));
-                    Log.d(LOG_TAG, "Both ids are matching");
-                    return true;
-                }
-           // }
-        }
-       return false;
-       */
-
         //Using SQLite
             Cursor movieCursor = getContext().getContentResolver().query(
                     MovieContract.MovieEntry.CONTENT_URI,
