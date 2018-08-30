@@ -1,11 +1,15 @@
 package com.app.cinema.cinema.utilities;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.app.cinema.cinema.Movie;
+import com.app.cinema.cinema.databaseSQLITE.MovieContract;
+import com.app.cinema.cinema.databaseSQLITE.MovieDbHelper;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -21,7 +25,7 @@ import java.util.ArrayList;
 public class NetworkUtils {
 
     private static final String TAG = NetworkUtils.class.getSimpleName();
-
+    private static MovieDbHelper mOpenHelper;
 
     /**
      * This method returns the entire result from the HTTP response.
@@ -77,7 +81,8 @@ public class NetworkUtils {
 
     }
 
-    public static Boolean networkStatus(Context context){
+
+        public static Boolean networkStatus(Context context){
         ConnectivityManager manager = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();

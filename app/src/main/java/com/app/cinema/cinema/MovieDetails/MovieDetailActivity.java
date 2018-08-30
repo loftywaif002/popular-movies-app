@@ -56,7 +56,6 @@ public class MovieDetailActivity extends AppCompatActivity {
                     .commit();
         }
 
-
     }
 
     protected void checkBuildVersion(){

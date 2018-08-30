@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.nfc.Tag;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -78,6 +79,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         holder.mMovietitle.setText(movie.getOriginalTitle());
 
         String posterUrl = movie.getPosterPath();
+
         // Warning: onError() will not be called, if url is null.
         // Empty url leads to app crash.
         if (posterUrl == null) {
@@ -98,7 +100,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
                                     holder.mMovieThumbnail.setVisibility(View.VISIBLE);
                                 }
                             }
-
                             @Override
                             public void onError(Exception e) {
                                 holder.mMovietitle.setVisibility(View.VISIBLE);
@@ -173,7 +174,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
                 String releaseDate = cursor.getString(MovieContract.MovieEntry.COL_MOVIE_RELEASE_DATE);
                 String posterPath = cursor.getString(MovieContract.MovieEntry.COL_MOVIE_POSTER_PATH);
                 Movie movie = new Movie(id,v_average,title,backdropPath,overview,releaseDate,posterPath);
-
                 mMovies.add(movie);
             } while (cursor.moveToNext());
 

@@ -14,6 +14,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -55,18 +56,15 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
 
     ArrayList<Movie> mPopularList;
     ArrayList<Movie> mTopTopRatedList;
-    List<Movie> updated_movie_list = new ArrayList<Movie>();
+
 
     private MovieAdapter mAdapter;
-
+    private MovieAdapter mAdapterFavorite;
     private String mSortBy = FetchMovies.POPULAR;
 
     private static final String EXTRA_MOVIES = "EXTRA_MOVIES";
     private static final String EXTRA_SORT_BY = "EXTRA_SORT_BY";
 
-    public static MovieDatabase mDb;
-    public static LiveData<List<Movie>> movies;
-    public static List<Movie> updated_list;
 
 
 
@@ -113,19 +111,6 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
                 dialog.show();
             }
         }
-        /*
-        mDb = MovieDatabase.getsInstance(getApplicationContext());
-        movies = mDb.movieDao().loadFavoriteMovies();
-        movies.observe(this, new Observer<List<Movie>>() {
-            @Override
-            public void onChanged(@Nullable List<Movie> movies) {
-                updated_list = movies;
-                Log.d(TAG,"updated list size"+updated_list.size());
-            }
-        });
-        */
-
-
     }
 
     @Override
@@ -216,24 +201,12 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
             movie_grid_recyclerView.setAdapter(mAdapter);
             break;
             case FetchMovies.FAVORITES:
-              /*
-                for (Movie movie: updated_list){
-                    updated_movie_list.add(movie);
-                }
-                if(updated_movie_list!=null){
-                    mAdapter = new MovieAdapter(new ArrayList<Movie>(),this);
-                    mAdapter.add(updated_movie_list);
-                    movie_grid_recyclerView.setAdapter(mAdapter);
-                }
-               */
                 getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER, null, this);
-            break;
+                break;
         }
 
 
     }
-
-
 
     public void send_details(Movie movie, int position) {
         if (tabletView) {
@@ -257,8 +230,8 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
     }
 
     @Override
-    public void onLoadFinished(@NonNull android.support.v4.content.Loader<Cursor> loader, Cursor data) {
-        mAdapter.add(data);
+    public void onLoadFinished(@NonNull android.support.v4.content.Loader<Cursor> loader, Cursor cursor) {
+        mAdapter.add(cursor);
         update_empty_state();
         findViewById(R.id.indeterminateBar).setVisibility(View.GONE);
     }
@@ -294,11 +267,11 @@ public class Dashboard extends AppCompatActivity implements MovieAdapter.OnItemC
 
             mPopularList = new ArrayList<>();
             mTopTopRatedList = new ArrayList<>();
-
             try {
                 if(NetworkUtils.networkStatus(Dashboard.this)){
                     mPopularList = NetworkUtils.fetchData(popularMoviesURL); //Get popular movies
                     mTopTopRatedList = NetworkUtils.fetchData(topRatedMoviesURL); //Get top rated movies
+
                 }else{
                     AlertDialog.Builder dialog = new AlertDialog.Builder(Dashboard.this);
                     dialog.setTitle(getString(R.string.title_network_alert));

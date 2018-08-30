@@ -115,7 +115,12 @@ public class Movie implements Parcelable {
 
     public String getBackdropPath() {
         if (backdropPath != null && !backdropPath.isEmpty()) {
-            return "http://image.tmdb.org/t/p/original" + backdropPath;
+            if(!backdropPath.toLowerCase().contains("http://")){
+                return "http://image.tmdb.org/t/p/original" + backdropPath;
+            }else{
+                return backdropPath;
+            }
+
         }
         return null; //Use Picasso to put placeholder for poster
     }
@@ -143,7 +148,13 @@ public class Movie implements Parcelable {
     @Nullable
     public String getPosterPath() {
         if (posterPath != null && !posterPath.isEmpty()) {
-            return "http://image.tmdb.org/t/p/w342" + posterPath;
+
+            if(!posterPath.toLowerCase().contains("http://")){
+                return "http://image.tmdb.org/t/p/w342" + posterPath;
+            }else{
+                return posterPath;
+            }
+
         }
         return null; //Use Picasso to put placeholder for poster
     }
